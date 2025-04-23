@@ -1,0 +1,63 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    
+    /* Define blood-red custom properties */
+    --blood-red-50: 0 100% 98%;
+    --blood-red-100: 0 100% 94%;
+    --blood-red-200: 0 100% 89%;
+    --blood-red-300: 0 100% 82%;
+    --blood-red-400: 0 91% 71%;
+    --blood-red-500: 0 84% 60%;
+    --blood-red-600: 0 72% 51%;
+    --blood-red-700: 0 74% 42%;
+    --blood-red-800: 0 70% 35%;
+    --blood-red-900: 0 63% 31%;
+    --blood-red-950: 0 76% 15%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Add some direct utility classes for blood-red colors */
+.bg-blood-red-600 {
+  background-color: rgb(220, 38, 38);
+}
+.bg-blood-red-700 {
+  background-color: rgb(185, 28, 28);
+}
+.bg-blood-red-800 {
+  background-color: rgb(153, 27, 27);
+}
+.text-blood-red-600 {
+  color: rgb(220, 38, 38);
+}
+.hover\:bg-blood-red-700:hover {
+  background-color: rgb(185, 28, 28);
+}
