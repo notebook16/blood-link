@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const BloodRequestForm = ({ selectedLocation, onRequestSubmit }) => {
+  const serverUrl = import.meta.env.VITE_SERVER_URL;
   const [formData, setFormData] = useState({
     patientName: '',
     hospitalName: '',
@@ -73,7 +74,7 @@ const BloodRequestForm = ({ selectedLocation, onRequestSubmit }) => {
     onRequestSubmit(requestData);
   
     try {
-      const response = await axios.post(`http://localhost:5000/api/requests/${requestID}`, requestData);
+      const response = await axios.post(`${serverUrl}/api/requests/${requestID}`, requestData);
       console.log('Request submitted:', response.data);
     } catch (error) {
       console.error('Error submitting request:', error);

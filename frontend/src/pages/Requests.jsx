@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 const Requests = () => {
+  const serverUrl = import.meta.env.VITE_SERVER_URL;
   const { userRole } = useAuth();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,9 +20,9 @@ const Requests = () => {
     try {
       let res;
       if (myRequestsOnly && requestID && userRole === 'donor') {
-        res = await axios.get(`http://localhost:5000/api/requests/${requestID}`);
+        res = await axios.get(`${serverUrl}/api/requests/${requestID}`);
       } else {
-        res = await axios.get('http://localhost:5000/api/requests');
+        res = await axios.get(`${serverUrl}/api/requests`);
       }
       setRequests(res.data);
     } catch (error) {
@@ -97,7 +98,7 @@ const Requests = () => {
     }
 
     try {
-      await axios.put('http://localhost:5000/api/requests/update', updatePayload);
+      await axios.put(`${serverUrl}/api/requests/update`, updatePayload);
       // Refetch fresh data
       await fetchRequests();
       // Switch UI filter to show updated card
