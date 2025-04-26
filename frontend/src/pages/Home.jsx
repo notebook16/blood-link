@@ -6,7 +6,7 @@ import BloodBankMap from '../components/BloodBankMap';
 import { Button } from '../components/ui/button';
 
 // Sleek hero image
-const heroImg = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80";
+const heroImg = "https://i.pinimg.com/736x/7b/87/0e/7b870e1666c621528377f27310937aec.jpg";
 
 const Home = () => {
   const { userRole } = useAuth();
@@ -15,10 +15,38 @@ const Home = () => {
 
   // Mock data for blood banks
   const bloodBanks = [
-    { id: 1, name: 'City Central Blood Bank', location: [51.505, -0.09], available: ['A+', 'B+', 'O+', 'O-'] },
-    { id: 2, name: 'East District Blood Center', location: [51.51, -0.1], available: ['A+', 'AB+'] },
-    { id: 3, name: 'Medical University Blood Bank', location: [51.5, -0.08], available: ['B+', 'B-', 'O+', 'AB+'] }
+    {
+      id: 1,
+      name: 'Prayag Blood Center',
+      location: [25.4450752, 81.8499104],
+      available: ['A+', 'O-', 'B+']
+    },
+    {
+      id: 2,
+      name: 'Red Cross Blood Bank Prayagraj',
+      location: [25.4370752, 81.8459104],
+      available: ['A-', 'B-', 'O+', 'AB+']
+    },
+    {
+      id: 3,
+      name: 'Sunrise Blood Bank',
+      location: [25.4430752, 81.8519104],
+      available: ['B+', 'O-', 'AB-']
+    },
+    {
+      id: 4,
+      name: 'LifeSaver Blood Bank',
+      location: [25.4390752, 81.8439104],
+      available: ['A+', 'B+', 'AB+']
+    },
+    {
+      id: 5,
+      name: 'Hope Blood Center',
+      location: [25.4470752, 81.8539104],
+      available: ['O+', 'O-', 'B-']
+    }
   ];
+  
 
   const handleLocationSelect = (location) => {
     setSelectedLocation(location);
@@ -50,7 +78,9 @@ const Home = () => {
             >
               Register as Blood Bank
             </Button>
+
           </div>
+          
         </div>
         <div className="flex-1 flex justify-center z-10">
           <div className="relative">
@@ -70,6 +100,14 @@ const Home = () => {
       </section>
 
       <main className="container mx-auto px-4 pb-12">
+      <div className="ml-3 pb-6 pt-3 flex ">
+              <Button
+                onClick={() => setShowRequestForm(true)}
+                className="bg-blood-red-800 text-white hover:bg-blood-red-100 hover:text-blood-red-700 px-8 py-4 rounded-xl shadow transition-colors font-semibold"
+              >
+                Raise a Blood Request
+              </Button>
+            </div>
         <div className="flex flex-col lg:flex-row gap-10">
           {/* Map + Banks */}
           <div className="lg:w-2/3 rounded-2xl bg-white/85 shadow-md p-0 backdrop-blur-xl">
@@ -84,14 +122,7 @@ const Home = () => {
                 height="400px"
               />
             </div>
-            <div className="px-6 pb-6 pt-3 flex justify-center">
-              <Button
-                onClick={() => setShowRequestForm(true)}
-                className="bg-blood-red-50/80 text-blood-red-800 hover:bg-blood-red-100 hover:text-blood-red-700 px-8 py-4 rounded-xl shadow transition-colors font-semibold"
-              >
-                Raise a Blood Request
-              </Button>
-            </div>
+            
           </div>
 
           {/* Right column- Stats & Info */}

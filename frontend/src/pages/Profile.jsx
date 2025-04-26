@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
 const Profile = () => {
+  const serverUrl = import.meta.env.VITE_SERVER_URL;
   const { userRole } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -54,7 +55,7 @@ const Profile = () => {
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/user/profile/${requestID}`,
+          `${serverUrl}/api/user/profile/${requestID}`,
           { params: { role: userRole } }
         );
         setProfileData(response.data);
@@ -73,12 +74,12 @@ const Profile = () => {
     e.preventDefault();
     try {
       await axios.put(
-        `http://localhost:5000/api/user/profile/${requestID}`,
+        `${serverUrl}/api/user/profile/${requestID}`,
         profileData,
         { params: { role: userRole } }
       );
       const res = await axios.get(
-        `http://localhost:5000/api/user/profile/${requestID}`,
+        `${serverUrl}/api/user/profile/${requestID}`,
         { params: { role: userRole } }
       );
       setProfileData(res.data);

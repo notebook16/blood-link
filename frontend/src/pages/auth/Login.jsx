@@ -9,6 +9,8 @@ import axios from 'axios';
 
 const Login = () => {
 
+  const serverUrl = import.meta.env.VITE_SERVER_URL;
+
   const [userType, setUserType] = useState('donor_patient'); // 'donor_patient' or 'blood_bank'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,8 +39,7 @@ const Login = () => {
         password: bankPassword,
       };
     }
-
-    const res = await axios.post('http://localhost:5000/api/login', payload);
+    const res = await axios.post(`${serverUrl}/api/login`, payload);
     
     // ✅ On successful login, update context or localStorage
    

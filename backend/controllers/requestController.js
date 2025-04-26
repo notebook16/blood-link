@@ -90,6 +90,7 @@ export const createRequest = async (req, res) => {
     });
 
     await newRequest.save();
+    console.log(newRequest)
 
     res.status(201).json({
       message: 'Blood request created successfully',

@@ -188,10 +188,9 @@ const Requests = () => {
                   </div>
                   <h3 className="font-bold mt-3 text-blood-red-800">patient: {request.patientName}</h3>
                   <p className="text-sm text-gray-500 mb-2"> {request.hospitalName}</p>
-                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+                  <div className="grid grid-row-2 gap-2 text-xs text-gray-500">
                     <div><span className="font-semibold">Units:</span> {safeNumber(request.units)}</div>
                     <div><span className="font-semibold">accepted by bank :</span> {(request.assignedTo)}</div>
-                    {console.log(`donated by ${request.donatedBy}`)}
                     <div><span className="font-semibold">volunteer by:</span> {(request.donatedBy)}</div>
                     
                   </div>

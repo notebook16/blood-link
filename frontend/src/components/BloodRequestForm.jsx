@@ -9,10 +9,14 @@ const BloodRequestForm = ({ selectedLocation, onRequestSubmit }) => {
     units: 1,
     urgency: 'normal',
     contactNumber: '',
-    additionalInfo: ''
+    additionalInfo: '',
+    useCurrentAddress: false,
   });
 
   const [requestID, setRequestID] = useState('');
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [locationAddress, setLocationAddress] = useState('');
+  const [locationFetched, setLocationFetched] = useState(false);
 
   useEffect(() => {
     // Fetch the user ID (requestID) from localStorage
@@ -28,27 +32,53 @@ const BloodRequestForm = ({ selectedLocation, onRequestSubmit }) => {
     });
   };
 
+  const handleUseCurrentAddress = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        setCurrentLocation({ lat: latitude, lng: longitude });
+
+        // Fetch the human-readable address using reverse geocoding (OpenStreetMap Nominatim)
+        try {
+          const geoResponse = await axios.get(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
+          );
+          const { display_name } = geoResponse.data;
+          setLocationAddress(display_name); // Set the decoded address
+        } catch (error) {
+          console.error("Error decoding the location:", error);
+        }
+
+        setLocationFetched(true);
+        setFormData({
+          ...formData,
+          useCurrentAddress: true,
+        });
+      });
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
   
     const requestData = {
       ...formData,
       requestID,
-      location: selectedLocation || { lat: 51.505, lng: -0.09 } // Default if no location selected
+      location: currentLocation || selectedLocation || { lat: 51.505, lng: -0.09 } // Default if no location
     };
   
     console.log('Submitting blood request:', requestData);
     onRequestSubmit(requestData);
   
     try {
-      // Use the full URL for your local backend
       const response = await axios.post(`http://localhost:5000/api/requests/${requestID}`, requestData);
       console.log('Request submitted:', response.data);
     } catch (error) {
       console.error('Error submitting request:', error);
     }
   };
-  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -144,17 +174,36 @@ const BloodRequestForm = ({ selectedLocation, onRequestSubmit }) => {
         />
       </div>
 
-      <div>
-        <label htmlFor="additionalInfo" className="block text-gray-700 mb-1">Additional Information</label>
-        <textarea
-          id="additionalInfo"
-          name="additionalInfo"
-          value={formData.additionalInfo}
-          onChange={handleChange}
-          rows="3"
-          className="w-full border border-gray-300 rounded-md px-4 py-2"
-        ></textarea>
+      {/* Use Current Address Button */}
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={handleUseCurrentAddress}
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md"
+        >
+          Use Current Address
+        </button>
       </div>
+
+      {/* Animation and Address Display */}
+      {locationFetched && (
+        <div className="flex items-center space-x-2 mt-2">
+          <svg className="w-6 h-6 text-green-500 animate-pulse" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M9 3a1 1 0 011 1v4a1 1 0 11-2 0V4a1 1 0 011-1z" clipRule="evenodd" />
+            <path fillRule="evenodd" d="M5 9a1 1 0 011 1v4a1 1 0 11-2 0V10a1 1 0 011-1z" clipRule="evenodd" />
+            <path fillRule="evenodd" d="M13 9a1 1 0 011 1v4a1 1 0 11-2 0V10a1 1 0 011-1z" clipRule="evenodd" />
+            <path fillRule="evenodd" d="M17 3a1 1 0 011 1v4a1 1 0 11-2 0V4a1 1 0 011-1z" clipRule="evenodd" />
+          </svg>
+          <span>Location fetched successfully!</span>
+        </div>
+      )}
+
+      {/* Show the decoded address */}
+      {locationAddress && (
+        <div className="text-sm text-gray-600 mt-2">
+          <strong>Current Address:</strong> {locationAddress}
+        </div>
+      )}
 
       <button 
         type="submit"

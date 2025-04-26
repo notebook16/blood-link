@@ -9,6 +9,7 @@ import axios from 'axios'; // ✅ correct
 
 
 const Register = () => {
+  const serverUrl = import.meta.env.VITE_SERVER_URL;
   const [userType, setUserType] = useState('donor_patient'); // 'donor_patient' or 'blood_bank'
   const [userId, setUserId] = useState(''); // New user ID state
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ const Register = () => {
         };
       }
   
-      const res = await axios.post('http://localhost:5000/api/register', payload);
+      const res = await axios.post(`${serverUrl}/api/register`, payload);
       alert('Registered successfully!');
       console.log(res.data);
       navigate('/auth/login');

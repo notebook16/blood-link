@@ -23,7 +23,7 @@ const requestSchema = new mongoose.Schema({
     lat: { type: Number },
     lng: { type: Number }
   },
-  distance: { type: String, default: '' }
+  distance: { type: String, default: '5' }
 });
 
 const Request = mongoose.model('Request', requestSchema);
