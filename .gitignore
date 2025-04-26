@@ -8,16 +8,16 @@ logs
 *.log
 npm-debug.log*
 
-# # dotenv environment files
-# .env
-# .env.local
+# dotenv environment files
+.env
+
 
 # # OS generated files
 # .DS_Store
 # Thumbs.db
 
-# # Build directories
-# dist/
-# build/
+# Build directories
+frontend/dist/
+build/
 
 
