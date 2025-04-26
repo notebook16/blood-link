@@ -58,7 +58,7 @@ const Home = () => {
   return (
     <div className="bg-gradient-to-tl from-blood-red-50 via-white to-blood-red-100 min-h-[100vh]">
       {/* Hero Section */}
-      <section className="relative flex flex-col md:flex-row items-center py-14 md:py-20 max-w-7xl mx-auto">
+      <section className="relative flex flex-col gap-4 md:flex-row items-center px-6 py-14 md:py-20 max-w-6xl mx-auto">
         <div className="flex-1 z-10">
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight" style={{letterSpacing: '0.0075em', fontFamily: "'Playfair Display', serif"}}>
             A <span className="text-blood-red-500">Single Drop</span> <br />
