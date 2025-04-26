@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+// after your imports
+import { useInterval } from '../hooks/useInterval'; // we'll create this custom hook
 
 const Requests = () => {
   const serverUrl = import.meta.env.VITE_SERVER_URL;
@@ -42,10 +44,14 @@ const Requests = () => {
   setBankName(localBankName)
   }, []);
 
-  // // Fetch on mount and when dependencies change
-  // useEffect(() => {
-  //   fetchRequests();
-  // }, [fetchRequests]);
+  // Fetch on mount and when dependencies change
+  useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
+
+  useInterval(() => {
+    fetchRequests();
+  }, 3000);
 
   // Helpers
   const capitalize = (value, fallback = '') =>
