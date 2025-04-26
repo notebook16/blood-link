@@ -12,7 +12,7 @@ export const registerUser = async (req, res) => {
     }
 
     if (role === 'donor' || role === 'patient') {
-      const { name, email, password, confirmPassword,contactNumber, userId, bloodGroup } = req.body;
+      const { name, email, password, confirmPassword, contactNumber, userId, bloodGroup } = req.body;
 
       // Check if passwords match
       if (password !== confirmPassword) {
