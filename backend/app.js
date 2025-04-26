@@ -18,7 +18,7 @@ const app = express();
 
 app.use(
     cors({
-      origin: 'http://localhost:8080', // Your frontend's URL
+      origin: ['http://localhost:8080', 'https://blood-link-zacl.onrender.com'], // Multiple allowed origins
       credentials: true, // Allow cookies to be included
     })
   );
