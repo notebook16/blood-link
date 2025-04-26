@@ -9,6 +9,9 @@ const Requests = () => {
   const [filter, setFilter] = useState('all');
   const [myRequestsOnly, setMyRequestsOnly] = useState(false);
   const [requestID, setRequestID] = useState('');
+  const [bankName , setBankName] = useState('');
+
+
 
   // Fetch function extracted to be re-used
   const fetchRequests = useCallback(async () => {
@@ -32,6 +35,10 @@ const Requests = () => {
   useEffect(() => {
     const storedRequestID = localStorage.getItem('userIdx');
     setRequestID(storedRequestID);
+    
+  const localBankName = localStorage.getItem('localBank');
+  console.log(` bank name ${localBankName}`);
+  setBankName(localBankName)
   }, []);
 
   // Fetch on mount and when dependencies change
@@ -74,15 +81,16 @@ const Requests = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-
+  
   // Handle status updates and refetch
   const handleAction = async (requestId, action) => {
     const updatePayload = { id: requestId };
     if (action === 'accept') {
       updatePayload.status = 'accepted';
+      updatePayload.assignedTo = bankName;
     } else if (action === 'volunteer') {
       updatePayload.status = 'assigned';
-      updatePayload.assignedTo = requestID;
+      updatePayload.donatedBy = requestID;
     } else if (action === 'complete') {
       updatePayload.status = 'completed';
       updatePayload.completedAt = new Date().toISOString();
@@ -98,6 +106,8 @@ const Requests = () => {
       console.error('Failed to update request status', error);
     }
   };
+
+  
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-6xl">
@@ -174,13 +184,16 @@ const Requests = () => {
                     <span className={`inline-block text-xs px-2 py-1 rounded ${getUrgencyClass(request.urgency)} shadow`}>
                       {capitalize(request.urgency)}
                     </span>
-                    <span className="text-xs text-gray-400">{safeNumber(request.distance)}</span>
+                    <span className="text-xs text-gray-400">{safeNumber(request.distance)} km</span>
                   </div>
-                  <h3 className="font-bold mt-3 text-blood-red-800">{request.patientName}</h3>
-                  <p className="text-sm text-gray-500 mb-2">{request.hospitalName}</p>
+                  <h3 className="font-bold mt-3 text-blood-red-800">patient: {request.patientName}</h3>
+                  <p className="text-sm text-gray-500 mb-2"> {request.hospitalName}</p>
                   <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
                     <div><span className="font-semibold">Units:</span> {safeNumber(request.units)}</div>
-                    <div><span className="font-semibold">Distance:</span> {safeNumber(request.distance)}</div>
+                    <div><span className="font-semibold">accepted by bank :</span> {(request.assignedTo)}</div>
+                    {console.log(`donated by ${request.donatedBy}`)}
+                    <div><span className="font-semibold">volunteer by:</span> {(request.donatedBy)}</div>
+                    
                   </div>
                 </div>
                 <div className="bg-gray-50 p-4 text-sm flex-1 flex flex-col justify-end">

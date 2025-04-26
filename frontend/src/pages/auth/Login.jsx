@@ -41,8 +41,15 @@ const Login = () => {
     const res = await axios.post('http://localhost:5000/api/login', payload);
     
     // ✅ On successful login, update context or localStorage
+   
     const userData = res.data.user;
     localStorage.setItem('userIdx', userData.userId);
+
+    
+    localStorage.setItem('localBank', userData.name);
+    
+  
+    
     
 
 

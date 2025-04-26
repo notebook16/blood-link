@@ -30,11 +30,12 @@ export const getAllRequestsById = async (req, res) => {
 
 export const updateRequestStatus = async (req, res) => {
  
-  const { id, status, assignedTo, completedAt } = req.body;
+  const { id, status, donatedBy, completedAt,assignedTo } = req.body;
   console.log(`Updating request at backend:`);
   console.log(`ID: ${id}`);
   console.log(`Status: ${status}`);
-  console.log(`Assigned To: ${assignedTo}`);
+  console.log(`donated BY: ${donatedBy}`);
+  console.log(`assigned to: ${assignedTo}`);
   console.log(`Completed At: ${completedAt}`);
   
 
@@ -47,6 +48,7 @@ export const updateRequestStatus = async (req, res) => {
       { id },
       {
         status,
+        ...(donatedBy && { donatedBy }),
         ...(assignedTo && { assignedTo }),
         ...(completedAt && { completedAt })
       },

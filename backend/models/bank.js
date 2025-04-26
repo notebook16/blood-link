@@ -17,7 +17,7 @@ const bloodBankSchema = new mongoose.Schema({
   },
   operatingHours: {
     type: String,
-    required: true,
+    required: false,
   },
   password: {
     type: String,

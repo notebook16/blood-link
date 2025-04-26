@@ -80,16 +80,6 @@ const Register = () => {
 
   
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   if (userType === 'donor_patient') {
-  //     alert('Donor/Patient registration successful!');
-  //   } else {
-  //     alert('Blood Bank registration successful!');
-  //   }
-  //   navigate('/auth/login');
-  // };
-
   return (
     <div className="container mx-auto px-4 py-12 max-w-md">
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">

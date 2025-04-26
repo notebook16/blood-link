@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
     login: (role) => {
       setIsAuthenticated(true);
       setUserRole(role); // For demo
+      console.log(`frontend role is ${role}`)
     },
     logout: () => {
       setIsAuthenticated(false);

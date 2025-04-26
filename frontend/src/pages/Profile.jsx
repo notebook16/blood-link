@@ -17,52 +17,74 @@ const Profile = () => {
     lastDonationDate: '',
     donationCount: 0,
     bankName: '',
-    licenseNumber: '',
-    operatingHours: ''
+    license: '',
+    operatingHours: '',
+    bankAddress: ''
   });
   const [requestID, setRequestID] = useState('');
 
-  // Fetch requestID once
+  const editableFields = {
+    donor: [
+      'name', 'contactNumber', 'address',
+      'medicalConditions', 'emergencyContact', 'lastDonationDate'
+    ],
+    patient: [
+      'name', 'contactNumber', 'address',
+      'bloodGroup', 'aadhaarNumber',
+      'medicalConditions', 'emergencyContact'
+    ],
+    bloodbank: [
+      'bankName', 'contactNumber', 'bankAddress',
+      'license', 'operatingHours'
+    ]
+  };
+
+  const displayName =
+    userRole === 'bloodbank'
+      ? profileData.bankName || ''
+      : profileData.name || '';
+
   useEffect(() => {
     const storedRequestID = localStorage.getItem('userIdx');
     setRequestID(storedRequestID);
-  }, []);
+  }, [userRole]);
 
-  // Fetch profile on mount or when requestID changes
   useEffect(() => {
     if (!requestID) return;
     (async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/user/profile/${requestID}`
+          `http://localhost:5000/api/user/profile/${requestID}`,
+          { params: { role: userRole } }
         );
         setProfileData(response.data);
       } catch (error) {
-        console.error('Error fetching profile data:', error);
+        console.error('Error fetching profile:', error);
       }
     })();
-  }, [requestID]);
+  }, [requestID, userRole]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setProfileData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     try {
       await axios.put(
         `http://localhost:5000/api/user/profile/${requestID}`,
-        profileData
+        profileData,
+        { params: { role: userRole } }
       );
-      // refetch updated data
-      const response = await axios.get(
-        `http://localhost:5000/api/user/profile/${requestID}`
+      const res = await axios.get(
+        `http://localhost:5000/api/user/profile/${requestID}`,
+        { params: { role: userRole } }
       );
-      setProfileData(response.data);
+      setProfileData(res.data);
       setIsEditing(false);
-    } catch (error) {
-      console.error('Error updating profile:', error);
+    } catch (err) {
+      console.error('Error updating profile:', err);
     }
   };
 
@@ -72,18 +94,13 @@ const Profile = () => {
         <div className="bg-white rounded-xl shadow-sm px-6 py-8">
           <div className="flex items-center mb-6">
             <div className="bg-blood-red-100 text-blood-red-600 rounded-full h-16 w-16 flex items-center justify-center text-3xl font-bold shadow-inner">
-              {profileData.name.charAt(0)}
+              {displayName.charAt(0) || ''}
             </div>
             <div className="ml-5">
-              <h3 className="text-xl font-bold text-blood-red-900">{profileData.name}</h3>
-              <p className="text-gray-500">
-                {userRole === 'donor' ? 'Donor' : userRole === 'bloodbank' ? 'Blood Bank' : 'Patient'}
-              </p>
-              {userRole === 'donor' && (
-                <span className="inline-block mt-1 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full shadow">
-                  Eligible to Donate
-                </span>
-              )}
+              <h3 className="text-xl font-bold text-blood-red-900">
+                {displayName || 'Unnamed'}
+              </h3>
+              <p className="text-gray-500 capitalize">{userRole}</p>
             </div>
             <div className="ml-auto">
               <button
@@ -100,18 +117,28 @@ const Profile = () => {
 
           {isEditing ? (
             <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-5">
-              {Object.entries(profileData).map(([key, val]) => (
-                <div key={key} className="flex flex-col">
-                  <label className="text-gray-500 mb-1 font-medium capitalize">{key}</label>
-                  <input
-                    type={key === 'lastDonationDate' ? 'date' : key === 'donationCount' ? 'number' : 'text'}
-                    name={key}
-                    value={val || ''}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blood-red-100 bg-gray-50"
-                  />
-                </div>
-              ))}
+              {Object.entries(profileData)
+                .filter(([key]) => editableFields[userRole]?.includes(key))
+                .map(([key, val]) => (
+                  <div key={key} className="flex flex-col">
+                    <label className="text-gray-500 mb-1 font-medium capitalize">
+                      {key}
+                    </label>
+                    <input
+                      name={key}
+                      value={val || ''}
+                      onChange={handleInputChange}
+                      type={
+                        key === 'lastDonationDate'
+                          ? 'date'
+                          : key === 'donationCount'
+                          ? 'number'
+                          : 'text'
+                      }
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blood-red-100 bg-gray-50"
+                    />
+                  </div>
+                ))}
               <div className="md:col-span-2 flex justify-end mt-4">
                 <button
                   type="submit"
@@ -123,67 +150,17 @@ const Profile = () => {
             </form>
           ) : (
             <div className="border-t border-blood-red-50 pt-4 grid md:grid-cols-2 gap-5">
-              {/* display fields */}
-              <div>
-                <h4 className="text-gray-400 text-xs uppercase mb-1">Email</h4>
-                <p className="text-gray-800">{profileData.email}</p>
-              </div>
-              <div>
-                <h4 className="text-gray-400 text-xs uppercase mb-1">Phone</h4>
-                <p className="text-gray-800">{profileData.contactNumber}</p>
-              </div>
-              <div>
-                <h4 className="text-gray-400 text-xs uppercase mb-1">Address</h4>
-                <p className="text-gray-800">{profileData.address}</p>
-              </div>
-              {userRole !== 'bloodbank' && (
-                <>
-                  <div>
-                    <h4 className="text-gray-400 text-xs uppercase mb-1">Blood Group</h4>
-                    <p className="text-gray-800">{profileData.bloodGroup}</p>
+              {Object.entries(profileData)
+                .filter(([key]) => !['_id', '__v', 'createdAt', 'updatedAt', 'userId'].includes(key))
+                .filter(([key]) => (key === 'bankAddress' ? userRole === 'bloodbank' : true))
+                .map(([key, val]) => (
+                  <div key={key}>
+                    <h4 className="text-gray-400 text-xs mb-1 capitalize">
+                      {key.replace(/([A-Z])/g, ' $1')}
+                    </h4>
+                    <p className="text-gray-800">{val}</p>
                   </div>
-                  <div>
-                    <h4 className="text-gray-400 text-xs uppercase mb-1">Aadhaar Number</h4>
-                    <p className="text-gray-800">{profileData.aadhaarNumber}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-gray-400 text-xs uppercase mb-1">Medical Conditions</h4>
-                    <p className="text-gray-800">{profileData.medicalConditions}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-gray-400 text-xs uppercase mb-1">Emergency Contact</h4>
-                    <p className="text-gray-800">{profileData.emergencyContact}</p>
-                  </div>
-                </>
-              )}
-              {userRole === 'donor' && (
-                <>
-                  <div>
-                    <h4 className="text-gray-400 text-xs uppercase mb-1">Last Donation Date</h4>
-                    <p className="text-gray-800">{profileData.lastDonationDate}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-gray-400 text-xs uppercase mb-1">Total Donations</h4>
-                    <p className="text-gray-800">{profileData.donationCount}</p>
-                  </div>
-                </>
-              )}
-              {userRole === 'bloodbank' && (
-                <>
-                  <div>
-                    <h4 className="text-gray-400 text-xs uppercase mb-1">Bank Name</h4>
-                    <p className="text-gray-800">{profileData.bankName}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-gray-400 text-xs uppercase mb-1">License Number</h4>
-                    <p className="text-gray-800">{profileData.licenseNumber}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-gray-400 text-xs uppercase mb-1">Operating Hours</h4>
-                    <p className="text-gray-800">{profileData.operatingHours}</p>
-                  </div>
-                </>
-              )}
+                ))}
             </div>
           )}
         </div>

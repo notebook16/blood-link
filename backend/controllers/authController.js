@@ -43,7 +43,8 @@ export const registerUser = async (req, res) => {
       return res.status(201).json({ message: "Donor/Patient registered successfully" });
 
     } else if (role === 'bloodbank') {
-      const { bankName, email, password, license, bankAddress } = req.body;
+      const { bankName, email, password, license, bankAddress,contactNumber, 
+        userId, } = req.body;
 
       // // Check if passwords match
       // if (password !== bankConfirmPassword) {
@@ -131,7 +132,8 @@ export const loginUser = async (req, res) => {
         id: user._id,
         role: user.role,
         email: user.email,
-        userId: user.userId
+        userId: user.userId,
+        name: user.name || user.bankName
       },
     });
   } catch (err) {

@@ -1,40 +1,63 @@
 import DonorPatient from '../models/user.js';
+import BloodBank from '../models/bank.js';  // Model for blood banks
 
-// GET user profile by userId
+// GET /api/user/profile/:userId
 export const getUserProfile = async (req, res) => {
-    try {
-      const { userId } = req.params;  // Correct way to access params
-      console.log(`get user profile ${userId}`)
-  
-      const user = await DonorPatient.findOne({ userId }).select('-password -confirmPassword');
-  
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-  
-      res.status(200).json(user);
-    } catch (error) {
-      console.error('Error fetching user profile:', error.message);
-      res.status(500).json({ message: 'Server error' });
-    }
-  };
-  
+  try {
+    const { userId } = req.params;
+    const { role } = req.query;  // 'bloodbank', 'donor', or 'patient'
+    console.log(`Fetching profile for ${role} with ID: ${userId}`);
 
-// PUT /api/user/profile/:id
+    let user;
+    if (role === 'bloodbank') {
+      user = await BloodBank.findOne({ userId }).select('-password -confirmPassword');
+    } else {
+      user = await DonorPatient.findOne({ userId }).select('-password -confirmPassword');
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error('Error fetching user profile:', error.message);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// PUT /api/user/profile/:userId
 export const updateProfile = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { userId } = req.params;
     const updates = req.body;
-    // Find and update by userId
-    const user = await DonorPatient.findOneAndUpdate(
-      { userId: id },
-      { $set: updates },
-      { new: true, runValidators: true }
-    ).lean();
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    return res.json(user);
-  } catch (err) {
-    console.error(err);
+    const { role } = req.query;
+
+
+    console.log(`Updating profile for ${role} with ID: ${userId}`, updates);
+
+    let updated;
+    if (role === 'bloodbank') {
+      updated = await BloodBank.findOneAndUpdate(
+        { userId },
+        { $set: updates },
+        { new: true, runValidators: true }
+      ).select('-password -confirmPassword').lean();
+    } else {
+      updated = await DonorPatient.findOneAndUpdate(
+        { userId },
+        { $set: updates },
+        { new: true, runValidators: true }
+      ).select('-password -confirmPassword').lean();
+    }
+
+    if (!updated) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json(updated);
+  } catch (error) {
+    console.error('Error updating profile:', error.message);
     return res.status(500).json({ message: 'Server error' });
   }
 };
