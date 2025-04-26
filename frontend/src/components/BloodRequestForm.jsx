@@ -1,5 +1,5 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const BloodRequestForm = ({ selectedLocation, onRequestSubmit }) => {
   const [formData, setFormData] = useState({
@@ -12,6 +12,14 @@ const BloodRequestForm = ({ selectedLocation, onRequestSubmit }) => {
     additionalInfo: ''
   });
 
+  const [requestID, setRequestID] = useState('');
+
+  useEffect(() => {
+    // Fetch the user ID (requestID) from localStorage
+    const storedRequestID = localStorage.getItem('userIdx');
+    setRequestID(storedRequestID);
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -20,16 +28,27 @@ const BloodRequestForm = ({ selectedLocation, onRequestSubmit }) => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // This would include location data from selectedLocation
+  
     const requestData = {
       ...formData,
+      requestID,
       location: selectedLocation || { lat: 51.505, lng: -0.09 } // Default if no location selected
     };
+  
     console.log('Submitting blood request:', requestData);
     onRequestSubmit(requestData);
+  
+    try {
+      // Use the full URL for your local backend
+      const response = await axios.post(`http://localhost:5000/api/requests/${requestID}`, requestData);
+      console.log('Request submitted:', response.data);
+    } catch (error) {
+      console.error('Error submitting request:', error);
+    }
   };
+  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

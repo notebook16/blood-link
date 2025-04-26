@@ -21,20 +21,23 @@ export const AuthProvider = ({ children }) => {
       email: 'john@example.com',
     };
     
-    setUserRole(mockUser.role);
-    setIsAuthenticated(true);
+    // setUserRole(mockUser.role);
+    // setIsAuthenticated(true);
   }, []);
   
   const value = {
     userRole,
     isAuthenticated,
     // Add authentication methods here in a real app
-    login: () => {
+    login: (role) => {
       setIsAuthenticated(true);
-      setUserRole('bloodbank'); // For demo
+      setUserRole(role); // For demo
     },
     logout: () => {
       setIsAuthenticated(false);
+      localStorage.clear();
+      localStorage.removeItem('userIdx');
+
       setUserRole(null);
     },
   };

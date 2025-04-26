@@ -4,9 +4,63 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import axios from 'axios'; // ✅ correct
+
+
 
 const Register = () => {
   const [userType, setUserType] = useState('donor_patient'); // 'donor_patient' or 'blood_bank'
+  const [userId, setUserId] = useState(''); // New user ID state
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    try {
+      let payload = {};
+  
+      if (userType === 'donor_patient') {
+        if (password !== confirmPassword) return alert("Passwords don't match");
+       
+
+  
+        payload = {
+          role: 'donor',
+          name,
+          email,
+          contactNumber, // Add this to payload
+          userId, // Add this to payload
+          bloodGroup,
+          password,
+          confirmPassword
+        };
+      } else if (userType === 'blood_bank') {
+        // if (bankPassword !== bankConfirmPassword) return alert("Passwords don't match");
+  
+        payload = {
+          role: 'bloodbank',
+          bankName,
+          email,
+          license,
+          bankAddress,
+          password,
+          contactNumber, // Add this to payload
+          userId, // Add this to payload
+        };
+      }
+  
+      const res = await axios.post('http://localhost:5000/api/register', payload);
+      alert('Registered successfully!');
+      console.log(res.data);
+      navigate('/auth/login');
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+      alert('Registration failed!');
+    }
+  };
+  
+
+
 
   // Donor/Patient fields
   const [name, setName] = useState('');
@@ -14,26 +68,27 @@ const Register = () => {
   const [bloodGroup, setBloodGroup] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [contactNumber, setContactNumber] = useState(''); // New contact number state
+  
 
   // Blood Bank fields
   const [bankName, setBankName] = useState('');
-  const [bankEmail, setBankEmail] = useState('');
   const [license, setLicense] = useState('');
   const [bankAddress, setBankAddress] = useState('');
-  const [bankPassword, setBankPassword] = useState('');
+
   const [bankConfirmPassword, setBankConfirmPassword] = useState('');
 
-  const navigate = useNavigate();
+  
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (userType === 'donor_patient') {
-      alert('Donor/Patient registration successful!');
-    } else {
-      alert('Blood Bank registration successful!');
-    }
-    navigate('/auth/login');
-  };
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   if (userType === 'donor_patient') {
+  //     alert('Donor/Patient registration successful!');
+  //   } else {
+  //     alert('Blood Bank registration successful!');
+  //   }
+  //   navigate('/auth/login');
+  // };
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-md">
@@ -99,6 +154,35 @@ const Register = () => {
                   />
                 </div>
                 <div>
+            <Label htmlFor="contactNumber" className="block text-gray-700 mb-1">
+              Contact Number
+            </Label>
+            <Input
+              id="contactNumber"
+              type="text"
+              value={contactNumber}
+              onChange={(e) => setContactNumber(e.target.value)}
+              required
+              placeholder="Enter your contact number"
+              className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-md"
+            />
+          </div>
+          <div>
+            <Label htmlFor="userId" className="block text-gray-700 mb-1">
+              User ID
+            </Label>
+            <Input
+              id="userId"
+              type="text"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              required
+              placeholder="Enter a unique User ID"
+              className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-md"
+            />
+          </div>
+                
+                <div>
                   <Label htmlFor="bloodGroup" className="block text-gray-700 mb-1">
                     Blood Group
                   </Label>
@@ -158,14 +242,44 @@ const Register = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="bankEmail" className="block text-gray-700 mb-1">
+            <Label htmlFor="userId" className="block text-gray-700 mb-1">
+              User ID
+            </Label>
+            <Input
+              id="userId"
+              type="text"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              required
+              placeholder="Enter a unique User ID"
+              className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-md"
+            />
+          </div>
+          <div>
+            <Label htmlFor="contactNumber" className="block text-gray-700 mb-1">
+              Contact Number
+            </Label>
+            <Input
+              id="contactNumber"
+              type="text"
+              value={contactNumber}
+              onChange={(e) => setContactNumber(e.target.value)}
+              required
+              placeholder="Enter your contact number"
+              className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-md"
+            />
+          </div>
+          
+          
+                <div>
+                  <Label htmlFor="email" className="block text-gray-700 mb-1">
                     Bank Email
                   </Label>
                   <Input
-                    id="bankEmail"
+                    id="email"
                     type="email"
-                    value={bankEmail}
-                    onChange={(e) => setBankEmail(e.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="bank@email.com"
                     className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-md"
@@ -200,14 +314,14 @@ const Register = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="bankPassword" className="block text-gray-700 mb-1">
+                  <Label htmlFor="password" className="block text-gray-700 mb-1">
                     Password
                   </Label>
                   <Input
-                    id="bankPassword"
+                    id="password"
                     type="password"
-                    value={bankPassword}
-                    onChange={(e) => setBankPassword(e.target.value)}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="Create password"
                     className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-md"

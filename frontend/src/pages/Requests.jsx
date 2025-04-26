@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 const Requests = () => {
@@ -6,191 +7,138 @@ const Requests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [myRequestsOnly, setMyRequestsOnly] = useState(false);
+  const [requestID, setRequestID] = useState('');
 
+  // Fetch function extracted to be re-used
+  const fetchRequests = useCallback(async () => {
+    setLoading(true);
+    try {
+      let res;
+      if (myRequestsOnly && requestID && userRole === 'donor') {
+        res = await axios.get(`http://localhost:5000/api/requests/${requestID}`);
+      } else {
+        res = await axios.get('http://localhost:5000/api/requests');
+      }
+      setRequests(res.data);
+    } catch (error) {
+      console.error('Failed to fetch requests', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [myRequestsOnly, requestID, userRole]);
+
+  // Initial load of stored user ID
   useEffect(() => {
-    const fetchRequests = () => {
-      setLoading(true);
-      setTimeout(() => {
-        const mockRequests = [
-          {
-            id: 'req-001',
-            patientName: 'Sarah Johnson',
-            hospitalName: 'City General Hospital',
-            bloodGroup: 'O+',
-            units: 2,
-            urgency: 'critical',
-            status: 'pending',
-            createdAt: '2023-11-15T10:30:00',
-            location: { lat: 51.505, lng: -0.09 },
-            distance: '2.5 km',
-          },
-          {
-            id: 'req-002',
-            patientName: 'Michael Brown',
-            hospitalName: 'St. Mary Medical Center',
-            bloodGroup: 'A-',
-            units: 1,
-            urgency: 'urgent',
-            status: 'assigned',
-            createdAt: '2023-11-14T16:45:00',
-            assignedTo: 'East District Blood Bank',
-            location: { lat: 51.51, lng: -0.1 },
-            distance: '3.8 km',
-          },
-          {
-            id: 'req-003',
-            patientName: 'Robert Wilson',
-            hospitalName: 'Community Health Hospital',
-            bloodGroup: 'B+',
-            units: 3,
-            urgency: 'normal',
-            status: 'completed',
-            createdAt: '2023-11-12T09:15:00',
-            assignedTo: 'City Central Blood Bank',
-            donatedBy: 'John Donor',
-            completedAt: '2023-11-12T14:30:00',
-            location: { lat: 51.5, lng: -0.08 },
-            distance: '1.2 km',
-          },
-          {
-            id: 'req-004',
-            patientName: 'Emily Davis',
-            hospitalName: 'University Medical Center',
-            bloodGroup: 'AB+',
-            units: 2,
-            urgency: 'urgent',
-            status: 'assigned',
-            createdAt: '2023-11-13T11:20:00',
-            assignedTo: 'City Central Blood Bank',
-            location: { lat: 51.49, lng: -0.12 },
-            distance: '4.0 km',
-          },
-          {
-            id: 'req-005',
-            patientName: 'James Miller',
-            hospitalName: 'Mercy Hospital',
-            bloodGroup: 'O-',
-            units: 1,
-            urgency: 'critical',
-            status: 'pending',
-            createdAt: '2023-11-15T08:10:00',
-            location: { lat: 51.52, lng: -0.07 },
-            distance: '5.2 km',
-          },
-        ];
-        
-        setRequests(mockRequests);
-        setLoading(false);
-      }, 800);
-    };
-    
+    const storedRequestID = localStorage.getItem('userIdx');
+    setRequestID(storedRequestID);
+  }, []);
+
+  // Fetch on mount and when dependencies change
+  useEffect(() => {
     fetchRequests();
-  }, [userRole]);
-  
+  }, [fetchRequests]);
+
+  // Helpers
+  const capitalize = (value, fallback = '') =>
+    typeof value === 'string' && value
+      ? value.charAt(0).toUpperCase() + value.slice(1)
+      : fallback;
+
+  const safeNumber = (value, fallback = 'N/A') => {
+    const num = typeof value === 'string' ? Number(value) : value;
+    return typeof num === 'number' && !isNaN(num) ? num : fallback;
+  };
+
+  // Filtered requests based on UI filter
   const filteredRequests = requests.filter(request => {
     if (filter === 'all') return true;
     return request.status === filter;
   });
 
-  const getStatusClass = (status) => {
+  const getStatusClass = status => {
     switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'assigned':
-        return 'bg-blue-100 text-blue-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'accepted': return 'bg-purple-100 text-purple-800';
+      case 'assigned': return 'bg-blue-100 text-blue-800';
+      case 'completed': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getUrgencyClass = (urgency) => {
+  const getUrgencyClass = urgency => {
     switch (urgency) {
-      case 'critical':
-        return 'bg-red-100 text-red-800';
-      case 'urgent':
-        return 'bg-orange-100 text-orange-800';
-      case 'normal':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'critical': return 'bg-red-100 text-red-800';
+      case 'urgent': return 'bg-orange-100 text-orange-800';
+      case 'normal': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
-  
-  const handleAction = (requestId, action) => {
-    console.log(`Performing ${action} on request ${requestId}`);
+
+  // Handle status updates and refetch
+  const handleAction = async (requestId, action) => {
+    const updatePayload = { id: requestId };
     if (action === 'accept') {
-      setRequests(
-        requests.map(req =>
-          req.id === requestId ? { ...req, status: 'assigned', assignedTo: 'Your Blood Bank' } : req
-        )
-      );
-    } else if (action === 'complete') {
-      setRequests(
-        requests.map(req =>
-          req.id === requestId ? { ...req, status: 'completed', completedAt: new Date().toISOString() } : req
-        )
-      );
+      updatePayload.status = 'accepted';
     } else if (action === 'volunteer') {
-      alert('Thank you for volunteering! The blood bank will contact you shortly.');
+      updatePayload.status = 'assigned';
+      updatePayload.assignedTo = requestID;
+    } else if (action === 'complete') {
+      updatePayload.status = 'completed';
+      updatePayload.completedAt = new Date().toISOString();
+    }
+
+    try {
+      await axios.put('http://localhost:5000/api/requests/update', updatePayload);
+      // Refetch fresh data
+      await fetchRequests();
+      // Switch UI filter to show updated card
+      setFilter(updatePayload.status);
+    } catch (error) {
+      console.error('Failed to update request status', error);
     }
   };
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-6xl">
+      {/* Header and Filters */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <h1 className="text-2xl font-bold mb-4 md:mb-0 text-blood-red-800">
-          {userRole === 'bloodbank' 
-            ? 'Blood Requests' 
-            : userRole === 'donor' 
-            ? 'Donation Opportunities' 
+          {userRole === 'bloodbank'
+            ? 'Blood Requests'
+            : userRole === 'donor'
+            ? 'Donation Opportunities'
             : 'My Blood Requests'}
         </h1>
-        <div className="flex space-x-2">
-          <button
-            className={`px-4 py-1 rounded-full text-sm font-medium border transition-colors ${
-              filter === 'all' 
-                ? 'bg-blood-red-600 text-white border-blood-red-500 shadow'
-                : 'bg-gray-100 hover:bg-blood-red-50 text-gray-700 border-gray-200'
-            }`}
-            onClick={() => setFilter('all')}
-          >
-            All
-          </button>
-          <button
-            className={`px-4 py-1 rounded-full text-sm font-medium border transition-colors ${
-              filter === 'pending'
-                ? 'bg-blood-red-600 text-white border-blood-red-500 shadow'
-                : 'bg-gray-100 hover:bg-blood-red-50 text-gray-700 border-gray-200'
-            }`}
-            onClick={() => setFilter('pending')}
-          >
-            Pending
-          </button>
-          <button
-            className={`px-4 py-1 rounded-full text-sm font-medium border transition-colors ${
-              filter === 'assigned'
-                ? 'bg-blood-red-600 text-white border-blood-red-500 shadow'
-                : 'bg-gray-100 hover:bg-blood-red-50 text-gray-700 border-gray-200'
-            }`}
-            onClick={() => setFilter('assigned')}
-          >
-            Assigned
-          </button>
-          <button
-            className={`px-4 py-1 rounded-full text-sm font-medium border transition-colors ${
-              filter === 'completed'
-                ? 'bg-blood-red-600 text-white border-blood-red-500 shadow'
-                : 'bg-gray-100 hover:bg-blood-red-50 text-gray-700 border-gray-200'
-            }`}
-            onClick={() => setFilter('completed')}
-          >
-            Completed
-          </button>
+        <div className="flex flex-col md:flex-row md:items-center gap-2">
+          <div className="flex space-x-2">
+            {['all', 'pending', 'accepted', 'assigned', 'completed'].map(status => (
+              <button
+                key={status}
+                className={`px-4 py-1 rounded-full text-sm font-medium border transition-colors ${
+                  filter === status
+                    ? 'bg-blood-red-600 text-white border-blood-red-500 shadow'
+                    : 'bg-gray-100 hover:bg-blood-red-50 text-gray-700 border-gray-200'
+                }`}
+                onClick={() => setFilter(status)}
+              >
+                {capitalize(status, status === 'all' ? 'All' : capitalize(status))}
+              </button>
+            ))}
+          </div>
+          <label className="flex items-center space-x-2 ml-2 text-sm text-gray-700 mt-2 md:mt-0">
+            <input
+              type="checkbox"
+              checked={myRequestsOnly}
+              onChange={() => setMyRequestsOnly(!myRequestsOnly)}
+              className="accent-blood-red-600"
+            />
+            <span>My Requests Only</span>
+          </label>
         </div>
       </div>
-      
+
+      {/* Loading and No Data States */}
       {loading ? (
         <div className="flex justify-center items-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blood-red-600"></div>
@@ -208,8 +156,9 @@ const Requests = () => {
           )}
         </div>
       ) : (
+        /* Requests Grid */
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {filteredRequests.map((request) => (
+          {filteredRequests.map(request => (
             <div key={request.id} className="bg-gradient-to-br from-blood-red-50 to-blood-red-100 rounded-2xl p-1 shadow-lg">
               <div className="bg-white rounded-xl shadow-sm flex flex-col h-full overflow-hidden">
                 <div className="p-5 border-b border-blood-red-50">
@@ -218,24 +167,20 @@ const Requests = () => {
                       {request.bloodGroup}
                     </span>
                     <span className={`text-xs px-2 py-1 rounded ${getStatusClass(request.status)} shadow`}>
-                      {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                      {capitalize(request.status)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center mt-2">
                     <span className={`inline-block text-xs px-2 py-1 rounded ${getUrgencyClass(request.urgency)} shadow`}>
-                      {request.urgency.charAt(0).toUpperCase() + request.urgency.slice(1)}
+                      {capitalize(request.urgency)}
                     </span>
-                    <span className="text-xs text-gray-400">{request.distance}</span>
+                    <span className="text-xs text-gray-400">{safeNumber(request.distance)}</span>
                   </div>
                   <h3 className="font-bold mt-3 text-blood-red-800">{request.patientName}</h3>
                   <p className="text-sm text-gray-500 mb-2">{request.hospitalName}</p>
                   <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-                    <div>
-                      <span className="font-semibold">Units:</span> {request.units}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Distance:</span> {request.distance}
-                    </div>
+                    <div><span className="font-semibold">Units:</span> {safeNumber(request.units)}</div>
+                    <div><span className="font-semibold">Distance:</span> {safeNumber(request.distance)}</div>
                   </div>
                 </div>
                 <div className="bg-gray-50 p-4 text-sm flex-1 flex flex-col justify-end">
@@ -247,6 +192,14 @@ const Requests = () => {
                       Accept Request
                     </button>
                   )}
+                  {request.status === 'accepted' && userRole === 'donor' && (
+                    <button
+                      onClick={() => handleAction(request.id, 'volunteer')}
+                      className="w-full bg-blood-red-600 text-white py-2 rounded-lg hover:bg-blood-red-700 font-medium shadow transition-colors"
+                    >
+                      Volunteer to Donate
+                    </button>
+                  )}
                   {request.status === 'assigned' && userRole === 'bloodbank' && (
                     <button
                       onClick={() => handleAction(request.id, 'complete')}
@@ -255,21 +208,11 @@ const Requests = () => {
                       Mark as Completed
                     </button>
                   )}
-                  {request.status === 'assigned' && userRole === 'donor' && (
-                    <button
-                      onClick={() => handleAction(request.id, 'volunteer')}
-                      className="w-full bg-blood-red-600 text-white py-2 rounded-lg hover:bg-blood-red-700 font-medium shadow transition-colors"
-                    >
-                      Volunteer to Donate
-                    </button>
-                  )}
-                  {(request.status === 'completed' || (userRole === 'patient')) && (
+                  {(request.status === 'completed' || userRole === 'patient') && (
                     <div className="text-gray-400 text-center py-2 mt-2">
-                      {request.status === 'completed' 
+                      {request.status === 'completed'
                         ? `Completed on ${new Date(request.completedAt).toLocaleDateString()}`
-                        : userRole === 'patient' && request.status === 'pending'
-                          ? 'Waiting for blood bank assignment'
-                          : 'Assigned to blood bank'}
+                        : 'Waiting for blood bank assignment'}
                     </div>
                   )}
                 </div>

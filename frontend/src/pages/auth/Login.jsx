@@ -5,22 +5,58 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import axios from 'axios';
 
 const Login = () => {
+
   const [userType, setUserType] = useState('donor_patient'); // 'donor_patient' or 'blood_bank'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [bankEmail, setBankEmail] = useState('');
-  const [bankPassword, setBankPassword] = useState('');
+  const [bankPassword , setBankPassword] = useState('');
+  
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // You may add more auth logic here based on userType
-    login();
-    navigate('/');
-  };
+    
+    
+  try {
+    let payload = {};
+
+    if (userType === 'donor_patient') {
+      payload = {
+        role: 'donor', // or 'patient' based on your logic/UI toggle
+        email,
+        password,
+      };
+    } else if (userType === 'blood_bank') {
+      payload = {
+        role: 'bloodbank',
+        email: email,
+        password: bankPassword,
+      };
+    }
+
+    const res = await axios.post('http://localhost:5000/api/login', payload);
+    
+    // ✅ On successful login, update context or localStorage
+    const userData = res.data.user;
+    localStorage.setItem('userIdx', userData.userId);
+    
+
+
+    alert('Login successful!');
+    console.log(userData);
+
+    // Example: if using AuthContext
+    login(userData.role); // optional: pass whole userData if needed
+    navigate('/'); // or wherever appropriate
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    alert('Login failed!');
+  }
+};
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-md">
@@ -89,14 +125,14 @@ const Login = () => {
             ) : (
               <>
                 <div>
-                  <Label htmlFor="bankEmail" className="block text-gray-700 mb-1">
+                  <Label htmlFor="email" className="block text-gray-700 mb-1">
                     Bank Email
                   </Label>
                   <Input
-                    id="bankEmail"
+                    id="email"
                     type="email"
-                    value={bankEmail}
-                    onChange={(e) => setBankEmail(e.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="bank@email.com"
                     className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-md focus:ring-2 focus:ring-blood-red-100 transition"
