@@ -42,10 +42,10 @@ const Requests = () => {
   setBankName(localBankName)
   }, []);
 
-  // Fetch on mount and when dependencies change
-  useEffect(() => {
-    fetchRequests();
-  }, [fetchRequests]);
+  // // Fetch on mount and when dependencies change
+  // useEffect(() => {
+  //   fetchRequests();
+  // }, [fetchRequests]);
 
   // Helpers
   const capitalize = (value, fallback = '') =>
