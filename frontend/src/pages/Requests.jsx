@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 // after your imports
-import { useInterval } from '../hooks/useInterval'; // we'll create this custom hook
+import { useInterval } from '../hooks/useInterval.js'; // we'll create this custom hook
 
 const Requests = () => {
   const serverUrl = import.meta.env.VITE_SERVER_URL;
