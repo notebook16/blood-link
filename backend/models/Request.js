@@ -23,7 +23,8 @@ const requestSchema = new mongoose.Schema({
     lat: { type: Number },
     lng: { type: Number }
   },
-  distance: { type: String, default: '5' }
+  distance: { type: String, default: '5' },
+  bankAddress: String
 });
 
 const Request = mongoose.model('Request', requestSchema);

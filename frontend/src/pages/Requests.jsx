@@ -13,6 +13,7 @@ const Requests = () => {
   const [myRequestsOnly, setMyRequestsOnly] = useState(false);
   const [requestID, setRequestID] = useState('');
   const [bankName , setBankName] = useState('');
+  const [bankAddress , setBankAddress] = useState('');
 
 
 
@@ -42,6 +43,9 @@ const Requests = () => {
   const localBankName = localStorage.getItem('localBank');
   console.log(` bank name ${localBankName}`);
   setBankName(localBankName)
+
+  const bankAddress = localStorage.getItem('localBankAddress')
+  setBankAddress(bankAddress)
   }, []);
 
   // Fetch on mount and when dependencies change
@@ -51,7 +55,7 @@ const Requests = () => {
 
   useInterval(() => {
     fetchRequests();
-  }, 3000);
+  }, 5000);
 
   // Helpers
   const capitalize = (value, fallback = '') =>
@@ -95,6 +99,7 @@ const Requests = () => {
     if (action === 'accept') {
       updatePayload.status = 'accepted';
       updatePayload.assignedTo = bankName;
+      updatePayload.bankAddress= bankAddress;
     } else if (action === 'volunteer') {
       updatePayload.status = 'assigned';
       updatePayload.donatedBy = requestID;
@@ -198,6 +203,7 @@ const Requests = () => {
                   <div className="grid grid-row-2 gap-2 text-xs text-gray-500">
                     <div><span className="font-semibold">Units:</span> {safeNumber(request.units)}</div>
                     <div><span className="font-semibold">accepted by bank :</span> {(request.assignedTo)}</div>
+                    <div><span className="font-semibold">bank Address:</span> {(request.bankAddress)}</div>
                     <div><span className="font-semibold">volunteer by:</span> {(request.donatedBy)}</div>
                     
                   </div>

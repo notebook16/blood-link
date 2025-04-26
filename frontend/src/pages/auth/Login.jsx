@@ -48,6 +48,8 @@ const Login = () => {
 
     
     localStorage.setItem('localBank', userData.name);
+
+    localStorage.setItem('localBankAddress', userData.address);
     
   
     

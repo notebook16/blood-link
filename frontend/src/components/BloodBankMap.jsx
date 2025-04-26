@@ -37,7 +37,6 @@ const LocationUpdater = ({ position }) => {
   return null;
 };
 
-// Utility to calculate distance between two [lat, lon] points (in KM)
 const getDistanceInKm = (lat1, lon1, lat2, lon2) => {
   const toRad = (value) => (value * Math.PI) / 180;
 
@@ -52,13 +51,41 @@ const getDistanceInKm = (lat1, lon1, lat2, lon2) => {
       Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return (R * c).toFixed(2); // 2 decimal places
+  return (R * c).toFixed(2);
 };
 
-const BloodBankMap = ({ bloodBanks, onLocationSelect }) => {
+// List of blood groups to randomly pick from
+const bloodGroups = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+
+// Generate dummy blood banks around a location
+const generateDummyBloodBanks = (latitude, longitude) => {
+  const dummyBloodBanks = [];
+
+  for (let i = 1; i <= 5; i++) {
+    const randomOffsetLat = (Math.random() - 0.5) / 100; // Small offset
+    const randomOffsetLon = (Math.random() - 0.5) / 100;
+
+    const randomAvailable = Array.from(
+      { length: Math.floor(Math.random() * 4) + 1 }, // 1 to 4 blood groups
+      () => bloodGroups[Math.floor(Math.random() * bloodGroups.length)]
+    );
+
+    dummyBloodBanks.push({
+      id: i,
+      name: `Blood Bank ${i}`,
+      location: [latitude + randomOffsetLat, longitude + randomOffsetLon],
+      available: randomAvailable,
+    });
+  }
+
+  return dummyBloodBanks;
+};
+
+const BloodBankMap = ({ onLocationSelect }) => {
   const [userLocation, setUserLocation] = useState(null);
   const [userAddress, setUserAddress] = useState("");
   const [nearbyHospitals, setNearbyHospitals] = useState([]);
+  const [bloodBanks, setBloodBanks] = useState([]);
   const mapRef = useRef();
 
   const getCurrentLocationAndNearbyHospitals = () => {
@@ -68,10 +95,15 @@ const BloodBankMap = ({ bloodBanks, onLocationSelect }) => {
         setUserLocation([latitude, longitude]);
         console.log("User Location:", latitude, longitude);
 
+        // Generate dummy blood banks near user
+        const generatedBanks = generateDummyBloodBanks(latitude, longitude);
+        setBloodBanks(generatedBanks);
+        console.log("Generated Blood Banks:", generatedBanks);
+
         // Fetch nearby hospitals
         try {
           const response = await fetch(
-            `https://overpass-api.de/api/interpreter?data=[out:json];(node["amenity"="hospital"](around:5000,${latitude},${longitude}););out;`
+            `https://overpass-api.de/api/interpreter?data=[out:json];(node["amenity"="hospital"](around:2000,${latitude},${longitude}););out;`
           );
           const data = await response.json();
           const hospitals = data.elements.map((el, index) => ({
@@ -115,7 +147,7 @@ const BloodBankMap = ({ bloodBanks, onLocationSelect }) => {
 
       <div style={{ height: "calc(100vh - 120px)", width: "100%" }}>
         <MapContainer
-          center={[28.6139, 77.2090]} // dummy center
+          center={[28.6139, 77.209]} // dummy center
           zoom={13}
           scrollWheelZoom={true}
           style={{ height: "100%", width: "100%" }}
@@ -157,6 +189,8 @@ const BloodBankMap = ({ bloodBanks, onLocationSelect }) => {
                 <Popup>
                   <b>{bank.name}</b><br />
                   {distance ? `${distance} km away` : "Distance unknown"}
+                  <br />
+                  Available: {bank.available.join(", ")}
                 </Popup>
               </Marker>
             );

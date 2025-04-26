@@ -133,7 +133,8 @@ export const loginUser = async (req, res) => {
         role: user.role,
         email: user.email,
         userId: user.userId,
-        name: user.name || user.bankName
+        name: user.name || user.bankName,
+        address: user.address || user.bankAddress
       },
     });
   } catch (err) {

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import BloodRequestForm from '../components/BloodRequestForm';
 import BloodBankMap from '../components/BloodBankMap';
 import { Button } from '../components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 // Sleek hero image
 const heroImg = "https://i.pinimg.com/736x/7b/87/0e/7b870e1666c621528377f27310937aec.jpg";
@@ -12,6 +13,8 @@ const Home = () => {
   const { userRole } = useAuth();
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [showRequestForm, setShowRequestForm] = useState(false);
+
+  const navigate = useNavigate();
 
   // Mock data for blood banks
   const bloodBanks = [
@@ -55,7 +58,7 @@ const Home = () => {
   return (
     <div className="bg-gradient-to-tl from-blood-red-50 via-white to-blood-red-100 min-h-[100vh]">
       {/* Hero Section */}
-      <section className="relative flex flex-col md:flex-row items-center px-6 py-14 md:py-20 max-w-6xl mx-auto">
+      <section className="relative flex flex-col md:flex-row items-center py-14 md:py-20 max-w-7xl mx-auto">
         <div className="flex-1 z-10">
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight" style={{letterSpacing: '0.0075em', fontFamily: "'Playfair Display', serif"}}>
             A <span className="text-blood-red-500">Single Drop</span> <br />
@@ -68,13 +71,13 @@ const Home = () => {
             <Button
               variant="outline"
               className="border border-gray-200 bg-white/80 text-gray-700 hover:bg-blood-red-50/70 hover:text-blood-red-700 transition-shadow shadow-sm"
-              onClick={() => window.location.href = '/auth/login'}
+              onClick={() => navigate("/auth/login")}
             >
               Login as Donor / Patient
             </Button>
             <Button
               className="bg-blood-red-100 text-blood-red-800 hover:bg-blood-red-200 hover:text-blood-red-900 shadow-sm transition-shadow font-medium"
-              onClick={() => window.location.href = '/auth/register'}
+              onClick={() => navigate("/auth/register")}
             >
               Register as Blood Bank
             </Button>
@@ -82,7 +85,7 @@ const Home = () => {
           </div>
           
         </div>
-        <div className="flex-1 flex justify-center z-10">
+        <div className="flex-1 flex justify-center z-10 ">
           <div className="relative">
             <img
               src={heroImg}
@@ -100,7 +103,7 @@ const Home = () => {
       </section>
 
       <main className="container mx-auto px-4 pb-12">
-      <div className="ml-3 pb-6 pt-3 flex ">
+      <div className="ml-1 pb-6 pt-3 flex ">
               <Button
                 onClick={() => setShowRequestForm(true)}
                 className="bg-blood-red-800 text-white hover:bg-blood-red-100 hover:text-blood-red-700 px-8 py-4 rounded-xl shadow transition-colors font-semibold"

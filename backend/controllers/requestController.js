@@ -30,13 +30,14 @@ export const getAllRequestsById = async (req, res) => {
 
 export const updateRequestStatus = async (req, res) => {
  
-  const { id, status, donatedBy, completedAt,assignedTo } = req.body;
+  const { id, status, donatedBy, completedAt,assignedTo , bankAddress } = req.body;
   console.log(`Updating request at backend:`);
   console.log(`ID: ${id}`);
   console.log(`Status: ${status}`);
   console.log(`donated BY: ${donatedBy}`);
   console.log(`assigned to: ${assignedTo}`);
   console.log(`Completed At: ${completedAt}`);
+  console.log(`bankAddress: ${bankAddress}`);
   
 
   if (!id || !status) {
@@ -50,7 +51,9 @@ export const updateRequestStatus = async (req, res) => {
         status,
         ...(donatedBy && { donatedBy }),
         ...(assignedTo && { assignedTo }),
-        ...(completedAt && { completedAt })
+        ...(completedAt && { completedAt }),
+        ...(bankAddress && { bankAddress })
+
       },
       { new: true }
     );
