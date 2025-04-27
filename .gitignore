@@ -8,8 +8,8 @@ logs
 *.log
 npm-debug.log*
 
-# dotenv environment files
-.env
+# # dotenv environment files
+# .env
 
 
 # # OS generated files

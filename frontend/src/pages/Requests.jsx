@@ -55,7 +55,7 @@ const Requests = () => {
 
   useInterval(() => {
     fetchRequests();
-  }, 5000);
+  }, 9000);
 
   // Helpers
   const capitalize = (value, fallback = '') =>
